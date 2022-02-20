@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 import time
 from uuid import uuid4
 
@@ -10,9 +11,9 @@ import texts
 from api.cse import CSEAPIError, GoogleSearchEngine, SearchResult
 from ext import parse_query
 
-TG_API_TOKEN = "<YOUR_TELEGRAM_API_TOKEN>"
-GOOGLE_API_KEY = "<YOUR_GOOGLE_API_KEY>"
-SEARCH_ENGINE_ID = "<YOUR_SEARCH_ENGINE_ID>"
+TG_API_TOKEN = os.environ['TG_API_TOKEN']
+GOOGLE_API_KEY = os.environ['SEARCH_ENGINE_ID']
+SEARCH_ENGINE_ID = os.environ['GOOGLE_API_KEY']
 
 bot = telebot.TeleBot(TG_API_TOKEN)
 cse = GoogleSearchEngine(GOOGLE_API_KEY, SEARCH_ENGINE_ID)

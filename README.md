@@ -29,5 +29,7 @@ You can find a copy of this license [here](LICENSE).
 ## TODOs 👨🏻‍💻
 
 - [x] Implement custom search engine (CSE) API for image searching.
-- [ ] Add pagination for image search results (currently only first 10 results are shown).
+- [x] Add pagination for image search results (currently only first 10 results are shown).
 - [ ] Add suggestions for image search queries that are misspelled.
+- [ ] Add search functionality in private chat with bot.
+- [ ] Add more commands to inline query (e.g. safe search, per page, ...).

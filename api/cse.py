@@ -61,15 +61,15 @@ class GoogleSearchEngine:
             status_code = r.status_code
             if status_code in (401, 403):
                 raise AuthError(
-                    "Authentication error occurred, API response: %s" % r.text
-                )
-            else:
-                raise CSEAPIError(
-                    "An error occurred while requesting the API, status code: %s, response: %s" % (
-                        status_code, r.text
-                    ),
+                    "Authentication error occurred, API response: %s" % r.text,
                     status_code
                 )
+            raise CSEAPIError(
+                "An error occurred while requesting the API, status code: %s, response: %s" % (
+                    status_code, r.text
+                ),
+                status_code
+            )
         return r
 
     def search(

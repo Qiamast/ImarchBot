@@ -6,7 +6,9 @@ from uuid import uuid4
 import telebot
 from telebot import types
 
+import texts
 from api.cse import CSEAPIError, GoogleSearchEngine, SearchResult
+from ext import parse_query
 
 TG_API_TOKEN = "<YOUR_TELEGRAM_API_TOKEN>"
 GOOGLE_API_KEY = "<YOUR_GOOGLE_API_KEY>"
@@ -29,40 +31,71 @@ def start_message(message: types.Message) -> None:
     """Handle `/start` command."""
     first_name = message.from_user.first_name
     chat_id = message.from_user.id
-    text = (
-        f"Hey [{first_name}](tg://user?id={chat_id})!\n\n"
-        "I'm **Imarch** 🤖, a bot for searching any kind images on Google 🌐.\n\n"
-        "⁉️ How to use me?\n\n"
-        "Just type my name followed by your query and I'll do the rest 😉\n\n"
-        "For example to search for images of a cat, type in below command in inline mode:\n"
-        "`@ImarchBot cat`\n\n"
-        "Remember you can only use me in inline mode 🙂"
+    bot.send_message(
+        chat_id,
+        texts.START_MSG.format(first_name=first_name, chat_id=chat_id),
+        parse_mode="Markdown"
     )
-    bot.send_message(chat_id, text, parse_mode="Markdown")
+
+
+# help command
+@bot.message_handler(commands=['help'])
+def help_message(message: types.Message) -> None:
+    """Handle `/help` command."""
+    chat_id = message.from_user.id
+    message_id = message.message_id
+    kb = [
+        [
+            types.InlineKeyboardButton(
+                "Search now 🔎",
+                switch_inline_query_current_chat=" "
+            )
+        ]
+    ]
+    bot.send_message(
+        chat_id,
+        texts.HELP_MSG,
+        parse_mode="Markdown",
+        reply_to_message_id=message_id,
+        reply_markup=types.InlineKeyboardMarkup(kb)
+    )
 
 
 # handle inline queries
 @bot.inline_handler(func=lambda query: len(query.query) > 0)
 def inline_query_handler(inline_query: types.InlineQuery) -> None:
     """Handle every inline query that is not empty."""
-    query = inline_query.query
-    query_id = inline_query.id
+    parsed_query = parse_query(inline_query.query)
+    # query string without commands
+    query_text = parsed_query.query
+    query_id = str(inline_query.id)
     results = []
     not_found = types.InlineQueryResultArticle(
         id=str(uuid4()),
         title="⚠️ No results found",
-        description="Couldn't find any results for your query 😔",
+        description=texts.NOT_FOUND_MSG,
         input_message_content=types.InputTextMessageContent(
             message_text="not_found_result"
         )
     )
+    page = 1
+    # handle query commands
+    if parsed_query.commands:
+        for command in parsed_query.commands:
+            if command.name.lower() == "page":
+                try:
+                    value = abs(int(command.value))
+                    page = value if value > 1 else 1
+                except ValueError:
+                    continue
     try:
-        search_result: SearchResult = cse.search(query, only_image=True)
+        search_result: SearchResult = cse.search(
+            query_text, page, only_image=True)
     except CSEAPIError as e:
-        logger.error(f"Error while searching for {query!r}: {e}")
+        logger.error(f"Error while searching for {query_text!r}: {e}")
         bot.answer_inline_query(query_id, [])
     else:
-        # for every item in search result that has image, add it to results
+        # for every item in search result that has image attribute, add it to results
         if search_result.items:
             for item in search_result.items:
                 if item.image:
@@ -91,10 +124,12 @@ def message_handler(message: types.Message) -> None:
     message_id = message.message_id
     if text == "not_found_result":
         bot.delete_message(chat_id, message_id)
+    else:
+        bot.send_message(chat_id, texts.NOT_FOUND_MSG)
 
 
 def start_polling() -> None:
-    """Start polling and responding to messages."""
+    """Start polling and responding to every message."""
     logger.info("Bot polling started...")
     bot.infinity_polling()
     while True:

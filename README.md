@@ -9,7 +9,7 @@ My Telegram username is [@ImarchBot](https://t.me/ImarchBot)
 
 ## How to use me?
 
-Please go ahead and start me by typing `/start` in [your Telegram](https://t.me/ImarchBot) chat,
+Please go ahead and start me by typing `/start` in [your Telegram](https://qiamast.github.io/ImarchBot/) chat,
 then you can use me to search for any image on the web by typing `@ImarchBot` in any chat followed by
 any image name.
 For instance, you can type `@ImarchBot` followed by `cat` to search for any image of a cat:

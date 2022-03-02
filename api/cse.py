@@ -73,7 +73,8 @@ class GoogleSearchEngine:
         return r
 
     def search(
-        self, 
+        self,
+        *,
         query: str, 
         page: Optional[int] = None,
         per_page: Optional[int] = None,

@@ -1,28 +1,25 @@
-import logging
+import os
 import sys
 import time
 from uuid import uuid4
 
-import telebot
-from telebot import types
+from telebot import TeleBot, types
 
 import texts
 from api.cse import CSEAPIError, GoogleSearchEngine, SearchResult
 from ext import parse_query
+from loggers import logger
 
-TG_API_TOKEN = "<YOUR_TELEGRAM_API_TOKEN>"
-GOOGLE_API_KEY = "<YOUR_GOOGLE_API_KEY>"
-SEARCH_ENGINE_ID = "<YOUR_SEARCH_ENGINE_ID>"
+TG_API_TOKEN = os.getenv("TG_API_TOKEN")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
 
-bot = telebot.TeleBot(TG_API_TOKEN)
+if not all((TG_API_TOKEN, GOOGLE_API_KEY, SEARCH_ENGINE_ID)):
+    logger.error("Missing environment variables! Exiting...")
+    sys.exit(1)
+
+bot = TeleBot(TG_API_TOKEN, parse_mode="Markdown")
 cse = GoogleSearchEngine(GOOGLE_API_KEY, SEARCH_ENGINE_ID)
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="[%(asctime)s] %(name)s | %(levelname)s | %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S"
-)
-logger = logging.getLogger()
 
 
 # start command
@@ -33,8 +30,7 @@ def start_message(message: types.Message) -> None:
     chat_id = message.from_user.id
     bot.send_message(
         chat_id,
-        texts.START_MSG.format(first_name=first_name, chat_id=chat_id),
-        parse_mode="Markdown"
+        texts.START_MSG.format(first_name=first_name, chat_id=chat_id)
     )
 
 
@@ -48,14 +44,13 @@ def help_message(message: types.Message) -> None:
         [
             types.InlineKeyboardButton(
                 "Search now 🔎",
-                switch_inline_query_current_chat=" "
+                switch_inline_query_current_chat=""
             )
         ]
     ]
     bot.send_message(
         chat_id,
         texts.HELP_MSG,
-        parse_mode="Markdown",
         reply_to_message_id=message_id,
         reply_markup=types.InlineKeyboardMarkup(kb)
     )
@@ -90,7 +85,10 @@ def inline_query_handler(inline_query: types.InlineQuery) -> None:
                     continue
     try:
         search_result: SearchResult = cse.search(
-            query_text, page, only_image=True)
+            query=query_text,
+            page=page,
+            only_image=True
+        )
     except CSEAPIError as e:
         logger.error(f"Error while searching for {query_text!r}: {e}")
         bot.answer_inline_query(query_id, [])
@@ -109,6 +107,19 @@ def inline_query_handler(inline_query: types.InlineQuery) -> None:
                             title=item.title
                         )
                     )
+        if search_result.spelling:
+            results.append(
+                types.InlineQueryResultArticle(
+                    id=str(uuid4()),
+                    title="✍🏻 Spelling suggestion",
+                    description=texts.SPELLING_MSG.format(
+                        corrected_query=search_result.spelling["correctedQuery"]
+                    ),
+                    input_message_content=types.InputTextMessageContent(
+                        message_text="spelling_suggestion"
+                    )
+                )
+            )
     if not results:
         bot.answer_inline_query(query_id, [not_found])
     else:
@@ -122,10 +133,26 @@ def message_handler(message: types.Message) -> None:
     text = message.text
     chat_id = message.chat.id
     message_id = message.message_id
-    if text == "not_found_result":
+
+    if text in ("not_found_result", "spelling_suggestion"):
         bot.delete_message(chat_id, message_id)
-    else:
-        bot.send_message(chat_id, texts.NOT_FOUND_MSG)
+        return
+
+    kb = [
+        [
+            types.InlineKeyboardButton(
+                "Search 🔎",
+                switch_inline_query_current_chat=text
+            )
+        ]
+    ]
+
+    bot.send_message(
+        chat_id,
+        texts.PRIVATE_SEARCH_MSG.format(query=text),
+        reply_to_message_id=message_id,
+        reply_markup=types.InlineKeyboardMarkup(kb)
+    )
 
 
 def start_polling() -> None:

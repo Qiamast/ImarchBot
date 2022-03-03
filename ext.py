@@ -20,7 +20,7 @@ class ParsedQuery:
     query: str
     """The query string without the commands."""
     commands: Optional[List[InlineCommand]] = None
-    """A list of tuples of commands and their arguments from the query."""
+    """A list of :class:`InlineCommand` objects parsed from the query (if any)."""
 
 
 def parse_query(text: str) -> ParsedQuery:

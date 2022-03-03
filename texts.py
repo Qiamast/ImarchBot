@@ -20,3 +20,10 @@ HELP_MSG = (
 NOT_FOUND_MSG = (
     "Sorry, I couldn't find any results for your query 😔"
 )
+SPELLING_MSG = (
+    "💡 Did you mean {corrected_query!r} instead?"
+)
+PRIVATE_SEARCH_MSG = (
+    "Press the button below to search for *{query!r}* "
+    "in this chat 👇🏻"
+)

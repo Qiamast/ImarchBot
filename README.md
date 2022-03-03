@@ -1,4 +1,4 @@
-# ImarchBot 
+# ImarchBot
 
 <img src="https://github.com/Qiamast/ImarchBot/blob/main/assets/ImarchBot-Logo-v3-transprant.png" alt="@ImarchBot Logo" width=250/>
 
@@ -17,8 +17,6 @@ For instance, you can type `@ImarchBot` followed by `cat` to search for any imag
 
 ![How to use @ImarchBot ? ](https://github.com/Qiamast/ImarchBot/blob/main/assets/How%20To%20%40Imarchbot%20Work.gif)
 
-
-
 ## Deployment instructions 🚀
 
 Coming soon!
@@ -36,6 +34,6 @@ You can find a copy of this license [here](LICENSE).
 
 - [x] Implement custom search engine (CSE) API for image searching.
 - [x] Add pagination for image search results (currently only first 10 results are shown).
-- [ ] Add suggestions for image search queries that are misspelled.
-- [ ] Add search functionality in private chat with bot.
+- [x] Add suggestions for image search queries that are misspelled.
+- [x] Add search functionality in private chat with bot.
 - [ ] Add more commands to inline query (e.g. safe search, per page, ...).

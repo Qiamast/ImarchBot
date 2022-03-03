@@ -10,9 +10,9 @@ from api.cse import CSEAPIError, GoogleSearchEngine, SearchResult
 from ext import parse_query
 from loggers import logger
 
-TG_API_TOKEN = os.getenv("TG_API_TOKEN")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
-SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
+TG_API_TOKEN = os.environ["TG_API_TOKEN"]
+GOOGLE_API_KEY = os.environ["GOOGLE_API_KEY"]
+SEARCH_ENGINE_ID = os.environ["SEARCH_ENGINE_ID"]
 
 if not all((TG_API_TOKEN, GOOGLE_API_KEY, SEARCH_ENGINE_ID)):
     logger.error("Missing environment variables! Exiting...")

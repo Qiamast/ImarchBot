@@ -57,7 +57,7 @@ def help_message(message: types.Message) -> None:
 
 
 # handle inline queries
-@bot.inline_handler(func=lambda query: len(query.query) > 0)
+@bot.inline_handler(func=lambda query: len(query.query) > 6)
 def inline_query_handler(inline_query: types.InlineQuery) -> None:
     """Handle every inline query that is not empty."""
     parsed_query = parse_query(inline_query.query)
@@ -77,7 +77,7 @@ def inline_query_handler(inline_query: types.InlineQuery) -> None:
     # handle query commands
     if parsed_query.commands:
         for command in parsed_query.commands:
-            if command.name.lower() == "page":
+            if command.name.lower() == "":
                 try:
                     value = abs(int(command.value))
                     page = value if value > 1 else 1
